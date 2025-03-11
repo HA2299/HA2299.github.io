@@ -1,0 +1,359 @@
+#include <iostream>
+#pragma once
+class List
+{
+private:
+	class Link
+	{
+	public:
+		Link(int linkValue, Link* nextPtr);
+		int value;
+		Link* next;
+
+	};
+public:
+	List();
+	List(const List&);
+	~List();
+
+	void add(int value);
+	int firstElement() const;
+	bool search(int value) const;
+	bool isEmpty() const;
+	void removeFirst();
+	void clear();
+	List& operator=(const List& rhs);
+	List(List&& source);
+	List& operator=(List&& rhs);
+	friend std::ostream& operator<<(std::ostream& lhs, const List& rhs);
+	void insert(int key);
+	void remove(int key);
+
+private:
+	Link* head;
+};
+
+#include "List.h"
+
+List::Link::Link(int val, Link* nxt) : value(val), next(nxt)
+{
+}
+List::List() : head(nullptr)
+{
+
+}
+List::List(const List& l)
+{
+	Link* src, * trg;
+	if (l.head == nullptr)
+		head = nullptr;
+	else
+	{
+		head = new Link((l.head)->value, nullptr);
+		src = l.head->next;
+		trg = head;
+		while (src != nullptr)
+		{
+			trg->next = new Link(src->value, nullptr);
+			src = src->next;
+			trg = trg->next;
+		}
+	}
+}
+List& List::operator=(const List& rhs)
+{
+	if (head)
+		delete head;
+	if (rhs.head)
+	{
+		head = new Link(rhs.head->value, nullptr);
+		Link* next;
+		Link* nextRhs=rhs.head->next;
+		for (Link* p = head; nextRhs!= nullptr; p = next)
+		{
+			p->next = new Link(nextRhs->value, nullptr);
+			next = p->next;
+			nextRhs = nextRhs->next;
+		}
+	}
+	else
+		head = nullptr;
+	return *this;
+}
+List::List(List&& source)
+{
+	head = source.head;
+	source.head = nullptr;
+}
+List& List::operator=(List&& rhs)
+{
+	if (head)
+		delete head;
+	head = rhs.head;
+	rhs.head = nullptr;
+	return *this;
+}
+std::ostream& operator<<(std::ostream& lhs, const List& rhs){
+	List l = rhs;
+	while (!l.isEmpty())
+	{
+		lhs<<l.firstElement();
+		l.removeFirst();
+
+	}
+	return lhs;
+}
+void List::insert(int key)
+{
+	Link* previous =nullptr;
+	Link* l = head;
+	while (l!= nullptr && l->value > key)
+	{
+		previous = l;
+		l = l->next;
+	}
+	Link* val = new Link(key, l);
+
+	if (previous == nullptr) {
+		head = val; 
+	}
+	else {
+		previous->next = val;
+	}
+}
+void List::remove(int key)
+{
+	Link* current = head;
+	Link* previous = nullptr;
+	while (current != nullptr && current->value != key)
+	{
+		previous = current;
+		current = current->next;
+	}
+	if (current == nullptr) return;
+
+	if (previous == nullptr) {
+		head = current->next;
+	}
+	else {
+		previous->next = current->next;
+	}
+}
+List::~List()
+{
+	clear();
+}
+void List::clear()
+{
+	Link* next;
+	for (Link* p = head; p != nullptr; p = next)
+	{
+		next = p->next;
+		delete p;
+	}
+	head = nullptr;
+}
+bool List::isEmpty() const
+{
+	return head == nullptr;
+}
+void List::add(int val)
+{
+	head = new Link(val, head);
+	if (head == nullptr)
+		throw "failed in memory allocation";
+}
+int List::firstElement() const
+{
+	if (isEmpty())
+		throw "the List is empty, no first Element";
+	return head->value;
+}
+bool  List::search(int val) const
+{
+	for (Link* p = head; p != nullptr; p = p->next)
+		if (val == p->value)
+			return true;
+	return false;
+}
+void List::removeFirst()
+{
+	if (isEmpty())
+		throw "the List is empty, no Elements to remove";
+	Link* p = head;
+	head = p->next;
+	delete p;
+}
+
+
+ // ChapterC.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include "List.h"
+using namespace std;
+
+enum choice { insert = 1, remove1, clear, print, exitProgram = -1 };
+
+List getList()
+{
+	int num;
+	cin >> num;
+	List l;
+	while (num >= 0)
+	{
+		l.insert(num);
+		cin >> num;
+	}
+	return l;
+}
+void menu()
+{
+	cout << "----------------------------------------" << endl;
+	cout << "enter a number 1-4 (-1 to exit): " << endl;
+	cout << "\t1 - insert element to list" << endl;
+	cout << "\t2 - remove element from list" << endl;
+	cout << "\t1 - clear all elements from list" << endl;
+	cout << "\t1 - print the list" << endl;
+	cout << "----------------------------------------" << endl << endl;
+
+}
+//int main()
+//{
+//
+//	int cho, val;
+//	cout << "enter the list values\n";
+//	List lst = getList();
+//	cout << "choose 0-2\n";
+//	cin >> cho;
+//	while (cho != exitProgram)
+//	{
+//		switch (cho)
+//		{
+//		case insert:cout << "enter a value to insert\n";
+//			cin >> val;
+//			try
+//			{
+//				lst.insert(val);
+//			}
+//			catch (const char* msg)
+//			{
+//				cout << msg << endl;
+//			}
+//			break;
+//		case remove1: cout << "enter a value to remove\n";
+//			cin >> val;
+//			try {
+//				lst.remove(val);
+//			}
+//			catch (const char* msg)
+//			{
+//				cout << msg << endl;
+//			}
+//			break;
+//		case clear: lst.clear();
+//			break;
+//		case print: cout << lst << endl;
+//			break;
+//		default:cout << "ERROR input. enter again!\n";
+//		}
+//
+//		menu();
+//		cin >> cho;
+//	}
+//	return 0;
+//
+//}
+#include <iostream>
+#include "List.h"
+using namespace std;
+List merge(List lst1, List lst2)
+{
+	List NewList = lst1;
+	List l2 = lst2;
+	while (!l2.isEmpty())
+	{
+		try
+		{
+			NewList.insert(l2.firstElement());
+		}
+		catch(const char* p)
+		{
+			cout << p;
+		}
+		l2.removeFirst();
+	}
+	return NewList;
+}
+void makeSet(List& lst)
+{
+	List lst2 = lst;
+	while (!(lst2.isEmpty()))
+	{
+		try {
+			int num = lst2.firstElement();
+			lst2.removeFirst();
+			if (!(lst2.isEmpty())&&num == lst2.firstElement())
+			{
+				lst.remove(num);
+			}
+		}
+		catch(char* p)
+		{
+			cout << p;
+		}
+	}
+}
+void reverse(List& lst)
+{
+	List lst2 = lst;
+	List lst3;
+	try {
+		while (!lst2.isEmpty())
+		{
+			int num = lst2.firstElement();
+			lst3.add(num);
+			lst2.removeFirst();
+		}
+		lst = lst3;
+	}
+	catch (char* p)
+	{
+		cout << p;
+	}
+}
+int main()
+{
+
+	List lst1, lst2, mergedList;
+
+	cout << "enter the first list:" << endl;
+	lst1 = getList();
+	cout << "enter the second list:" << endl;
+	lst2 = getList();
+
+	mergedList = merge(lst1, lst2);
+	cout << "the new merged list: " << mergedList << endl;
+
+	makeSet(mergedList);
+	cout << "the new merged set: " << mergedList << endl;
+
+	reverse(mergedList);
+	cout << "the new merged reverse: " << mergedList << endl;
+
+
+	return 0;
+}
+
+
+
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
+
+// Tips for Getting Started: 
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
