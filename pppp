@@ -1,0 +1,18 @@
+void List::remove(int key)
+{
+	Link* current = head;
+	Link* previous = nullptr;
+	while (current != nullptr && current->value != key)
+	{
+		previous = current;
+		current = current->next;
+	}
+	if (current == nullptr) return;
+
+	if (previous == nullptr) {
+		head = current->next;
+	}
+	else {
+		previous->next = current->next;
+	}
+}
