@@ -1,0 +1,102 @@
+#ifndef QUESTION_H
+#define QUESTION_H
+
+#include <memory>
+#include <stdexcept>
+
+/**
+ * Abstract base class for all expression nodes.
+ */
+class Expr {
+public:
+    virtual ~Expr() = default;
+    /// Evaluate the expression tree and return its numeric value.
+    virtual double eval() const = 0;
+};
+
+// ---------- Leaf ------------------------------------------------------------
+
+class Const : public Expr {
+public:
+    explicit Const(double v);
+    double eval() const override;
+private:
+    double value_;
+};
+
+// ---------- Unary -----------------------------------------------------------
+
+class Negate : public Expr {
+public:
+    explicit Negate(std::shared_ptr<Expr> child);
+    double eval() const override;
+private:
+    std::shared_ptr<Expr> child_;
+};
+
+// ---------- Binary ----------------------------------------------------------
+
+class Add : public Expr {
+public:
+    Add(std::shared_ptr<Expr> lhs, std::shared_ptr<Expr> rhs);
+    double eval() const override;
+private:
+    std::shared_ptr<Expr> lhs_, rhs_;
+};
+
+class Mul : public Expr {
+public:
+    Mul(std::shared_ptr<Expr> lhs, std::shared_ptr<Expr> rhs);
+    double eval() const override;
+private:
+    std::shared_ptr<Expr> lhs_, rhs_;
+};
+
+#endif // QUESTION_H
+#include "Question.h"
+
+// ---------------- Const -----------------------------------------------------
+
+Const::Const(double v) : value_(v) {
+    // Constructor implementation
+}
+
+double Const::eval() const {
+    return value_;
+}
+
+// ---------------- Negate ----------------------------------------------------
+
+Negate::Negate(std::shared_ptr<Expr> child) : child_(child) {
+    if (!child) {
+        throw std::invalid_argument("Child expression cannot be null");
+    }
+}
+
+double Negate::eval() const {
+    return -child_->eval(); // Correctly evaluate the child expression
+}
+
+// ---------------- Add -------------------------------------------------------
+
+Add::Add(std::shared_ptr<Expr> l, std::shared_ptr<Expr> r) : lhs_(l), rhs_(r) {
+    if (!lhs_ || !rhs_) {
+        throw std::invalid_argument("LHS and RHS expressions cannot be null");
+    }
+}
+
+double Add::eval() const {
+    return lhs_->eval() + rhs_->eval(); // Correctly evaluate both children
+}
+
+// ---------------- Mul -------------------------------------------------------
+
+Mul::Mul(std::shared_ptr<Expr> l, std::shared_ptr<Expr> r) : lhs_(l), rhs_(r) {
+    if (!lhs_ || !rhs_) {
+        throw std::invalid_argument("LHS and RHS expressions cannot be null");
+    }
+}
+
+double Mul::eval() const {
+    return lhs_->eval() * rhs_->eval(); // Correctly evaluate both children
+}
